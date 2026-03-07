@@ -13,7 +13,7 @@ a task falls within the defined "Activation Trigger."
 | **Testing Standards**     | Any `src/test` modification or work in `:integration` | `.agents/skills/testing.md`         |
 | **Git Usage**             | Downloading or pushing a commit.                      | `.agents/skills/git.md`             |
 | **Context Documentation** | Writing a javadoc, encountering an annotation         | `.agents/skills/context.md`         |
-| **Design Patterns**       | Any `.java` file modificatio                          | `.agents/skills/design-patterns.md` |
+| **Design Patterns**       | Any `.java` file modification                         | `.agents/skills/design-patterns.md` |
 
 ## 2. Third Party Skills (Situational)
 
