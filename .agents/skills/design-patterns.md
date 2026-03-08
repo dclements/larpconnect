@@ -19,10 +19,12 @@ interface is often the right strategy.
 ```java
 Foo.java:
 
+@DefaultImplementation(DefaultFoo.class)
 interface Foo {}
 
 DefaultFoo.java:
 
+@BuildWith(LocalModule.class)
 final class DefaultFoo implements Foo {
    @Inject
    DefaultFoo() {}
@@ -91,7 +93,7 @@ public interface Capability {}
 
 public interface CapabilityService extends Capability, Service {}
 
-class DefaultCapabilityService implements Capability extends AbstractIdleService {}
+class DefaultCapabilityService extends AbstractIdleService implements Capability {}
 ```
 
 Then in the guice module bind it as follows:
