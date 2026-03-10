@@ -1,8 +1,9 @@
-package com.larpconnect.njall.common.verticle;
+package com.larpconnect.njall.api.verticle;
 
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.Closer;
 import com.google.protobuf.ByteString;
+import com.google.protobuf.Message;
 import com.larpconnect.njall.common.id.IdGenerator;
 import com.larpconnect.njall.proto.MessageRequest;
 import com.larpconnect.njall.proto.Observability;
@@ -73,14 +74,27 @@ abstract class AbstractLcVerticle extends AbstractVerticle {
                 closer.register(MDC.putCloseable("parent_span_id", parentSpanIdStr));
                 closer.register(MDC.putCloseable("span_id", spanIdStr));
 
-                MessageResponse response = handleMessage(newSpanId, finalMessage);
+                Promise<Message> responsePromise = Promise.promise();
+                responsePromise
+                    .future()
+                    .onComplete(
+                        ar -> {
+                          if (ar.succeeded()) {
+                            msg.reply(ar.result());
+                          } else {
+                            log.error("Error handling message on channel: {}", channel, ar.cause());
+                            msg.fail(-1, "Internal Error");
+                          }
+                        });
+
+                MessageResponse response = handleMessage(newSpanId, finalMessage, responsePromise);
                 if (response == BasicResponse.SHUTDOWN) {
                   vertx.eventBus().consumer(channel).unregister();
                 }
               } catch (IOException e) {
                 // Closer does not throw IOException in this context
               } catch (RuntimeException e) {
-                log.error("Error handling message on channel: " + channel, e);
+                log.error("Error handling message on channel: {}", channel, e);
                 msg.fail(-1, "Internal Error");
               }
             });
@@ -112,5 +126,6 @@ abstract class AbstractLcVerticle extends AbstractVerticle {
     return message.toBuilder().setTraceparent(obsBuilder.build()).build();
   }
 
-  protected abstract MessageResponse handleMessage(byte[] spanId, MessageRequest message);
+  protected abstract MessageResponse handleMessage(
+      byte[] spanId, MessageRequest message, Promise<Message> responsePromise);
 }
