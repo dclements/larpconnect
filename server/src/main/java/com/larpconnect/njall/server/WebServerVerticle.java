@@ -157,7 +157,7 @@ final class WebServerVerticle extends AbstractVerticle {
       ctx.json(new JsonObject(json));
     } catch (RuntimeException | IOException e) {
       logger.error("Failed to convert message to JSON", e);
-      ctx.fail(e);
+      ctx.fail(java.net.HttpURLConnection.HTTP_INTERNAL_ERROR, e);
     }
   }
 
